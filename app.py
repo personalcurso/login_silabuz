@@ -2,11 +2,12 @@ from flask import Flask,render_template,redirect,url_for,flash,request
 from flask_sqlalchemy import SQLAlchemy
 import os
 from flask_login import current_user, login_user,login_required
-from forms import LoginForm
+from forms import LoginForm,EditProfileForm
 from flask_login import LoginManager
 from flask_migrate import Migrate
 from flask_login import logout_user
 import hashlib
+from flask_moment import Moment
 
 
 
@@ -21,6 +22,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS']= os.environ.get('SQLALCHEMY_TRACK_M
 
 db=SQLAlchemy(app)
 Migrate(app,db)
+moment = Moment(app)
 
 @app.route('/')
 @login_required #tiene que tener la sesion iniciada
@@ -75,8 +77,8 @@ def for_moderators_only():
 
 @app.route("/insert")
 def insert():
-    u = User(username = "aula1_prueba", email = "aula1_prueba@gmail.com")
-    u.set_password("789456")
+    u = User(username = "angelbonilla", email = "angelbonilla@hotmail.com")
+    u.set_password("123456")
     db.session.add(u)
     db.session.commit()
     return "Insertado"
@@ -103,6 +105,40 @@ def pagina_no_encontrada(e):
 @app.route('/noexiste')
 def usuario_noencontrado():
     return render_template('noexiste.html')
+
+
+@app.route('/usuario/<username>')
+@login_required
+def informacion_usuario(username):
+    #WHERE
+    obj_usuario=User.query.filter_by(username=username).first_or_404()
+    return render_template('usuario/perfil.html',usuario =obj_usuario)
+
+
+@app.route('/usuario/edit-profile', methods=['GET', 'POST'])
+@login_required
+def edit_profile():
+    form = EditProfileForm()
+
+    if form.validate_on_submit():
+        current_user.name = form.name.data
+        current_user.location = form.location.data
+        current_user.about_me = form.about_me.data
+
+        db.session.add(current_user._get_current_object())
+        db.session.commit()
+
+        flash('Tu perfil se actualizó correctamente.')
+        return redirect(url_for('.informacion_usuario', username=current_user.username))
+
+    form.name.data = current_user.name
+    form.location.data = current_user.location
+    form.about_me.data = current_user.about_me
+
+    return render_template('usuario/editar_perfil.html', form=form)
+
+
+
 
 if __name__ =='__main__':
     app.run(debug=True)

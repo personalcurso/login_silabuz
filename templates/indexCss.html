@@ -1,6 +1,7 @@
 {% extends 'base.html'%}
 {% block content %} 
 
+
 <div>
     Microblog:
     <a href="{{ url_for('index') }}">Home</a>
@@ -13,6 +14,11 @@
 
     <br>
     <h1>Bienvido {{current_user.username}}</h1>
-    <p>Gracias por estar aqui</p>
+    <p>Avatar 
+        <img class="img" src="{{ current_user.avatar }}" />
+    
+    </p>
+
+
 
 {% endblock %}

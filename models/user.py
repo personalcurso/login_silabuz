@@ -3,6 +3,10 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin,AnonymousUserMixin
 from models.role import Role,Permission
 from app import login
+from datetime import datetime
+import hashlib
+
+
 
 @login.user_loader
 def load_user(id):
@@ -17,7 +21,29 @@ class User(UserMixin,db.Model):
     posts = db.relationship('Post', backref='author', lazy='dynamic')
     role_id = db.Column(db.Integer, db.ForeignKey('role.id'))
 
-    def __init__(self, **kwargs):
+
+    name = db.Column(db.String(64))
+    location = db.Column(db.String(64))
+    about_me = db.Column(db.Text())
+    member_since = db.Column(db.DateTime(), default=datetime.utcnow)
+    last_seen = db.Column(db.DateTime(), default=datetime.utcnow)
+    avatar = db.Column(db.String(300)) #aqui almaceno la url de mi avatar del usuario
+
+
+    def gravatar(self, size=100, default='identicon', rating='g'):
+        url = 'https://secure.gravatar.com/avatar'
+        hash = hashlib.md5(self.email.lower().encode('utf-8')).hexdigest()
+        return '{url}/{hash}?s={size}&d={default}&r={rating}'.format(url=url, hash=hash, size=size, default=default, rating=rating)
+
+
+    def ping(self): #ULTIMO UNICIO DE SESION DEL USUARIO
+        self.last_seen = datetime.utcnow()
+        db.session.add(self)
+        db.session.commit()
+
+
+
+    def __init__(self, **kwargs):  #Constructor 
         super(User, self).__init__(**kwargs)
         if self.role is None:
             if self.username == "abonillago":
@@ -25,6 +51,12 @@ class User(UserMixin,db.Model):
         if self.role is None:
             if self.role is None:
                 self.role = Role.query.filter_by(default=True).first()
+        
+
+        url = 'https://secure.gravatar.com/avatar'
+        hash = hashlib.md5(self.email.lower().encode('utf-8')).hexdigest()
+        self.avatar = '{url}/{hash}?s={size}&d={default}&r={rating}'.format(url=url, hash=hash, size=100, default='identicon', rating='g')
+        
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
