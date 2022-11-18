@@ -1,6 +1,6 @@
 {% extends 'base.html'%}
 
-{% block content %} 
+{% block content %}
 
 <h1>Login-User</h1>
 
@@ -11,16 +11,44 @@
         {{form.username.label}} <br>
         {{form.username}}
 
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        {% for message in messages: %}
+        <span style="color: red"> {{ message }}</span>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        {% for error in form.username.errors %}
+
+        <span style="color: red"> {{ error }}</span>
+        {% endfor %}
+
+
     </p>
     <p>
         {{form.password.label}} <br>
         {{form.password}}
 
+        
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        {% for message in messages: %}
+        <span style="color: red"> {{ message }}</span>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        {% for error in form.password.errors %}
+
+        <span style="color: red"> {{ error }}</span>
+        {% endfor %}
+
     </p>
 
     <p>
         {{form.boton}} <br>
-        
+
     </p>
 
 </form>

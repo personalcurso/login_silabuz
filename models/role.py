@@ -14,7 +14,7 @@ class Role(db.Model):
     permissions = db.Column(db.Integer)
     users = db.relationship('User', backref='role', lazy='dynamic')
 
-    def __init__(self, **kwargs):   
+    def __init__(self, **kwargs):
         super(Role, self).__init__(**kwargs)
         if self.permissions is None:
             self.permissions = 0
